@@ -1,0 +1,15 @@
+<html>
+<head>
+<script type="text/javascript" src="hmac-sha512.js"></script>
+<script type="text/javascript" src="pbkdf2.js"></script>
+<script type="text/javascript" src="enc-base64-min.js"></script>
+<script type="text/javascript">
+//s = CryptoJS.SHA512("hello", "abc");
+//s = CryptoJS.HmacSHA512("hello", "abc");
+s = CryptoJS.PBKDF2("hello", 'abc', { keySize: 512/32, iterations: 1000, hasher: CryptoJS.algo.SHA512}); 
+document.write(s.toString(CryptoJS.enc.Base64));
+</script>
+</head>
+<body>
+</body>
+</html>
