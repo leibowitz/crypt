@@ -3,5 +3,6 @@ include "pbkdf2.php";
 $rounds = 1000;
 $salt = 'abc';
 $password = 'hello';
-print base64_encode(PBKDF2($password, $salt, $rounds, 'sha512'))."\n";
+
+print base64_encode(pbkdf2('sha512', $password, $salt, $rounds, 64, true))."\n";
 

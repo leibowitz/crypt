@@ -1,49 +1,47 @@
 <?php
 
+/*
+ * PBKDF2 key derivation function as defined by RSA's PKCS #5: https://www.ietf.org/rfc/rfc2898.txt
+ * $algorithm - The hash algorithm to use. Recommended: SHA256
+ * $password - The password.
+ * $salt - A salt that is unique to the password.
+ * $count - Iteration count. Higher is better, but slower. Recommended: At least 1000.
+ * $key_length - The length of the derived key in bytes.
+ * $raw_output - If true, the key is returned in raw binary format. Hex encoded otherwise.
+ * Returns: A $key_length-byte key derived from the password and salt.
+ *
+ * Test vectors can be found here: https://www.ietf.org/rfc/rfc6070.txt
+ *
+ * This implementation of PBKDF2 was originally created by https://defuse.ca
+ * With improvements by http://www.variations-of-shadow.com
+ * Coming from http://crackstation.net/hashing-security.htm#phpsourcecode
+ */
+function pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output = false)
+{
+    $algorithm = strtolower($algorithm);
+    if(!in_array($algorithm, hash_algos(), true))
+        die('PBKDF2 ERROR: Invalid hash algorithm.');
+    if($count <= 0 || $key_length <= 0)
+        die('PBKDF2 ERROR: Invalid parameters.');
 
-    /**
-     * Password-Based Key Derivation Function using PBKDF2
-     * as described by RSA's PKCS #5: https://www.ietf.org/rfc/rfc2898.txt
-     * Note: You will want to run base64_encode on the output of this method to use it
-     * as text as the output is binary.
-     * @static
-     * @param string $password The plaintext password to hash.
-     * @param string $salt A salt that is unique to the password.
-     * @param int $keyLength The length of the derived key in bytes.
-     * @param string $iterations The number of times to hash the password before returning.
-     * @param string $algorithm The hash algorithm to use.
-     * @return Binary string of $keyLength bytes, derived from the provided $password and $salt.
-     */
-    function PBKDF2($password, $salt, $iterations = 10000, $algorithm = 'sha256', $keyLength = 64)
-    {
-        $algorithm = strtolower($algorithm);
+    $hash_length = strlen(hash($algorithm, "", true));
+    $block_count = ceil($key_length / $hash_length);
 
-        // Determine the length of the specified hash
-        $hashLength = strlen(hash($algorithm, null, true));
-
-        // The number of iterations of the hash necessary to fill $keyLength characters
-        // IE: If $keyLength is 256 but $hashLength is only 128, we'd need 2 blocks
-        // to fill our $keyLength. If $keyLength was 128 and $hashLength is 256, we'd just
-        // take a subset of $output when we're done.
-        $blockCount = ceil($keyLength / $hashLength);
-
-        $output = '';
-
-        for($i = 1; $i <= $blockCount; $i++)
-        {
-            // Beginning hash for this block/iteration
-            $iterate = $block = hash_hmac($algorithm, $salt . pack('N', $i), $password, true);
-
-            // Hash each block the specified number of times
-            for($j = 1; $j < $iterations; $j++)
-            {
-                // XOR each iterate
-                $iterate ^= ($block = hash_hmac($algorithm, $block, $password, true));
-            }
-            // Block is completed, append to the output and move on to the next
-            $output .= $iterate;
+    $output = "";
+    for($i = 1; $i <= $block_count; $i++) {
+        // $i encoded as 4 bytes, big endian.
+        $last = $salt . pack("N", $i);
+        // first iteration
+        $last = $xorsum = hash_hmac($algorithm, $last, $password, true);
+        // perform the other $count - 1 iterations
+        for ($j = 1; $j < $count; $j++) {
+            $xorsum ^= ($last = hash_hmac($algorithm, $last, $password, true));
         }
-
-        // Return up to $keyLength characters
-        return substr($output, 0, $keyLength);
+        $output .= $xorsum;
     }
+
+    if($raw_output)
+        return substr($output, 0, $key_length);
+    else
+        return bin2hex(substr($output, 0, $key_length));
+}
