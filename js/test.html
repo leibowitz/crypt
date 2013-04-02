@@ -4,12 +4,41 @@
 <script type="text/javascript" src="pbkdf2.js"></script>
 <script type="text/javascript" src="enc-base64-min.js"></script>
 <script type="text/javascript">
-//s = CryptoJS.SHA512("hello", "abc");
-//s = CryptoJS.HmacSHA512("hello", "abc");
-s = CryptoJS.PBKDF2("hello", 'abc', { keySize: 512/32, iterations: 1000, hasher: CryptoJS.algo.SHA512}); 
-document.write(s.toString(CryptoJS.enc.Base64));
+function getField(field)
+{
+    var o = document.getElementById(field);
+    return o ? o.value : '';
+}
+
+function generateHash()
+{
+    domain = getField('domain');
+    login = getField('login');
+    name = getField('name');
+    password = getField('password');
+    salt = 'abc';
+    s = CryptoJS.PBKDF2(password, salt, { keySize: 512/32, iterations: 1000, hasher: CryptoJS.algo.SHA512}); 
+    document.write(s.toString(CryptoJS.enc.Base64));
+}
 </script>
 </head>
 <body>
+<label>
+Domain
+<input type="text" id="domain" name="domain" />
+</label>
+<label>
+Login
+<input type="text" id="login" name="login" />
+</label>
+<label>
+Name
+<input type="text" id="name" name="name" />
+</label>
+<label>
+Password
+<input type="password" id="password" name="password" />
+</label>
+<button name="btnGen" onclick="generateHash();">Generate</button>
 </body>
 </html>
