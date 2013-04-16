@@ -3,14 +3,18 @@ include "pbkdf2.php";
 include "prompt.php";
 $rounds = 1000;
 
-$domain = readline('Domain: ');
-$login = readline('Login: ');
-$name = readline('Name: ');
+$domain = readline('Realm: ');
+$user = readline('User: ');
+$salt = readline('Salt: ');
 echo 'Password: ';
 $password = _promptPassword();
 echo "\n";
 
-$salt = 'abc';
+$key = $user.':'.$password.':'.$domain;
 
-print base64_encode(pbkdf2('sha512', $password, $salt, $rounds, 64, true))."\n";
+srand();
+$salt = $salt ? $salt : base64_encode(openssl_random_pseudo_bytes(32));
+print $salt."\n";
+
+print str_replace('+', '.', base64_encode(pbkdf2('sha512', $key, $salt, $rounds, 64, true)))."\n";
 
