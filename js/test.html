@@ -10,35 +10,63 @@ function getField(field)
     return o ? o.value : '';
 }
 
+function setField(field, value)
+{
+    var o = document.getElementById(field);
+    if(o)
+    {
+        o.value = value;
+    }
+}
+
 function generateHash()
 {
     domain = getField('domain');
     login = getField('login');
-    name = getField('name');
     password = getField('password');
-    salt = 'abc';
-    s = CryptoJS.PBKDF2(password, salt, { keySize: 512/32, iterations: 1000, hasher: CryptoJS.algo.SHA512}); 
-    document.write(s.toString(CryptoJS.enc.Base64));
+    salt = getField('salt');
+    key = login + ':' + password + ':' + domain;
+    if(!salt)
+    {
+        salt = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Base64);
+    }
+    s = CryptoJS.PBKDF2(key, salt, { keySize: 512/32, iterations: 1000, hasher: CryptoJS.algo.SHA512}); 
+    setField('hash', s.toString(CryptoJS.enc.Base64).replace('+', '.'));
 }
 </script>
 </head>
 <body>
+
+<div>
 <label>
-Domain
+Realm
 <input type="text" id="domain" name="domain" />
 </label>
+</div>
+
+<div>
 <label>
-Login
+User
 <input type="text" id="login" name="login" />
 </label>
+</div>
+
+<div>
 <label>
-Name
-<input type="text" id="name" name="name" />
+Salt
+<input type="text" id="salt" name="salt" />
 </label>
+</div>
+
+<div>
 <label>
 Password
 <input type="password" id="password" name="password" />
 </label>
+</div>
+
+<input type="text" id="hash" name="hash" />
+
 <button name="btnGen" onclick="generateHash();">Generate</button>
 </body>
 </html>
