@@ -24,9 +24,10 @@ if(isset($_POST) && $_POST)
         include "pbkdf2.php";
         $rounds = 1000;
 
+        $encode = implode(':', array($name, $login, $password, $realm));
         $salt = 'abc';
 
-        $hash = base64_encode(pbkdf2('sha512', $password, $salt, $rounds, 64, true));
+        $hash = base64_encode(pbkdf2('sha512', $encode, $salt, $rounds, 64, true));
     }
 
 }

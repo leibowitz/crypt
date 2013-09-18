@@ -4,13 +4,14 @@ include "prompt.php";
 $rounds = 1000;
 
 $domain = readline('Realm: ');
+$name = readline('Name: ');
 $user = readline('User: ');
 $salt = readline('Salt: ');
 echo 'Password: ';
 $password = _promptPassword();
 echo "\n";
 
-$key = $user.':'.$password.':'.$domain;
+$key = implode(':', array($name, $user, $password, $domain));
 
 srand();
 $salt = $salt ? $salt : base64_encode(openssl_random_pseudo_bytes(32));

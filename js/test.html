@@ -22,10 +22,11 @@ function setField(field, value)
 function generateHash()
 {
     domain = getField('domain');
+    name = getField('name');
     login = getField('login');
     password = getField('password');
     salt = getField('salt');
-    key = login + ':' + password + ':' + domain;
+    key = name + ':' + login + ':' + password + ':' + domain;
     if(!salt)
     {
         salt = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Base64);
@@ -41,6 +42,13 @@ function generateHash()
 <label>
 Realm
 <input type="text" id="domain" name="domain" />
+</label>
+</div>
+
+<div>
+<label>
+Name
+<input type="text" id="name" name="name" />
 </label>
 </div>
 

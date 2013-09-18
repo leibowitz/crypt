@@ -9,10 +9,11 @@ import os
 
 domain = raw_input('Realm: ')
 user = raw_input('User: ')
+name = raw_input('Name: ')
 salt = raw_input('Salt: ')
 password = getpass.getpass()
 
-key = ':'.join([user, password, domain])
+key = ':'.join([name, user, password, domain])
 salt = salt if salt else base64.b64encode(os.urandom(32))
 print salt
 rounds = 1000
