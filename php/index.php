@@ -16,9 +16,7 @@ if(isset($_POST) && $_POST)
     $password   = $_POST['inputPassword'];
     $realm      = $_POST['inputRealm'];
 
-    if($name && 
-        $login &&
-        $password &&
+    if( $password &&
         $realm)
     {
         include "pbkdf2.php";
@@ -42,17 +40,17 @@ if(isset($_POST) && $_POST)
   </head>
   <body>
     <div class="container">
-        <h1>Encrypt My Password</h1>
+        <h1>Hash My Password</h1>
         <form class="form-horizontal" method="post">
             <fieldset>
-                <legend>Legend</legend>
-  <div class="control-group <?php if($post && !$login) echo 'error' ?>">
+                <legend></legend>
+  <div class="control-group">
     <label class="control-label" for="inputLogin">Login</label>
     <div class="controls">
       <input type="text" name="inputLogin" placeholder="Login" value="<?php echo htmlentities($login); ?>" />
     </div>
   </div>
-  <div class="control-group <?php if($post && !$name) echo 'error' ?>">
+  <div class="control-group">
     <label class="control-label" for="inputName">Name</label>
     <div class="controls">
       <input type="text" name="inputName" placeholder="Name" value="<?php echo htmlentities($name); ?>" />
