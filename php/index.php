@@ -98,7 +98,7 @@ if(isset($_POST) && $_POST)
             <div id="resultPanel">
                 <?php //if($hash): ?>
                 <fieldset>
-                <legend>Your Hash for <?php echo $realm; ?></legend>
+                <legend>Your Hash for <span id="txtRealm"><?php echo $realm; ?></span></legend>
                 <input type="text" id="hash" name="hash" class="input-xxlarge" value="<?php echo htmlentities($hash); ?>" />
             </fieldset>
                 <?php //endif ?>
@@ -108,32 +108,90 @@ if(isset($_POST) && $_POST)
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
     <script type="text/javascript">
+
+    function Input (elem)
+    {
+        this.elem = elem;
+    }
+
+    Input.prototype.setErrorClass = function() {
+        this.setErrorClassValue('add');
+    }
+    
+    Input.prototype.unsetErrorClass = function() {
+        this.setErrorClassValue('remove');
+    }
+    
+    Input.prototype.setErrorClassValue = function(op) {
+        $div = this.elem.parent().parent('.control-group');
+        if( op == 'add' ) {
+            $div.addClass('error');
+        } else if ( op == 'remove' ) {
+            $div.removeClass('error');
+        }
+    }
+
+    Input.prototype.isEmpty = function() {
+        return this.elem.val() == '';
+    }
+
     $('#resultPanel').hide();
     $('#mainForm').on('submit', function(e){
         $('#resultPanel').hide();
-        $.ajax({
-            //url: '<?php echo $_SERVER['PHP_SELF']; ?>',
-            dataType: 'json',
-            cache: false,
-            type: 'POST',
-            data: {
-                inputName: $('#inputName').val(),
-                inputLogin: $('#inputLogin').val(),
-                inputRealm: $('#inputRealm').val(),
-                inputPassword: $('#inputPassword').val(),
-                inputLength: $('input[name=inputLength]:checked').val()
+
+        var $name = $('#inputName');
+        var $login = $('#inputLogin');
+        var $realm = $('#inputRealm');
+        var $password = $('#inputPassword');
+        var $length = $('input[name=inputLength]:checked');
+        
+        var inputName = new Input($name);
+        var inputLogin = new Input($login);
+        var inputRealm = new Input($realm);
+        var inputPassword = new Input($password);
+        var inputLength = new Input($length);
+        
+        inputName.unsetErrorClass();
+        inputLogin.unsetErrorClass();
+        inputRealm.unsetErrorClass();
+        inputPassword.unsetErrorClass();
+        inputLength.unsetErrorClass();
+
+        if( !inputRealm.isEmpty() && 
+            !inputPassword.isEmpty() ) {
+            $.ajax({
+                //url: '<?php echo $_SERVER['PHP_SELF']; ?>',
+                dataType: 'json',
+                cache: false,
+                type: 'POST',
+                data: {
+                    inputName: $name.val(),
+                    inputLogin: $login.val(),
+                    inputRealm: $realm.val(),
+                    inputPassword: $password.val(),
+                    inputLength: $length.val()
+                }
+            }).done(function(data){
+                if(data.status)
+                {
+                    var $hash = $('#hash');
+                    $hash.val(data.hash);
+                    $('#txtRealm').text($realm.val());
+                    $('#resultPanel').show();
+                    $hash.select();
+                } else {
+                    console.log(data);
+                }
+            });
+        } else {
+            if( inputRealm.isEmpty() ) {
+                inputRealm.setErrorClass('add');
             }
-        }).done(function(data){
-            if(data.status)
-            {
-                var $hash = $('#hash');
-                $hash.val(data.hash);
-                $('#resultPanel').show();
-                $hash.select();
-            } else {
-                console.log(data);
+            if( inputPassword.isEmpty() ) {
+                inputPassword.setErrorClass('add');
             }
-        });
+        }
+
         return false;
     });
     </script>
